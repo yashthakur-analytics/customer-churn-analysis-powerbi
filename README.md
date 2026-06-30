@@ -150,5 +150,5 @@ This project demonstrates the complete analytics workflow, from SQL-based data e
 
 **Your Name**
 
-- GitHub: https://github.com/yourusername
+- GitHub: https://github.com/yashthakur-analytics
 - LinkedIn: https://linkedin.com/in/yourprofile
