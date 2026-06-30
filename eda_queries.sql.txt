@@ -1,0 +1,119 @@
+-- ==========================================
+-- CUSTOMER CHURN ANALYSIS - EDA QUERIES
+-- ==========================================
+
+-- 1. Total Customers
+
+SELECT COUNT(*) AS Total_Customers
+FROM customer_churn_stage;
+
+
+-- 2. Overall Churn Rate
+
+SELECT
+    COUNT(*) AS Total_Customers,
+    SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END) AS Churned_Customers,
+    ROUND(
+        100.0 * SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS Churn_Rate
+FROM customer_churn_stage;
+
+
+-- 3. Contract Analysis
+
+SELECT
+    Contract,
+    COUNT(*) AS Total_Customers,
+    SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END) AS Churned_Customers,
+    ROUND(
+        100.0 * SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS Churn_Rate
+FROM customer_churn_stage
+GROUP BY Contract
+ORDER BY Churn_Rate DESC;
+
+
+-- 4. Internet Service Analysis
+
+SELECT
+    InternetService,
+    COUNT(*) AS Total_Customers,
+    SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END) AS Churned_Customers,
+    ROUND(
+        100.0 * SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS Churn_Rate
+FROM customer_churn_stage
+GROUP BY InternetService
+ORDER BY Churn_Rate DESC;
+
+
+-- 5. Payment Method Analysis
+
+SELECT
+    PaymentMethod,
+    COUNT(*) AS Total_Customers,
+    SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END) AS Churned_Customers,
+    ROUND(
+        100.0 * SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS Churn_Rate
+FROM customer_churn_stage
+GROUP BY PaymentMethod
+ORDER BY Churn_Rate DESC;
+
+
+-- 6. Senior Citizen Analysis
+
+SELECT
+    SeniorCitizen,
+    COUNT(*) AS Total_Customers,
+    SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END) AS Churned_Customers,
+    ROUND(
+        100.0 * SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS Churn_Rate
+FROM customer_churn_stage
+GROUP BY SeniorCitizen
+ORDER BY Churn_Rate DESC;
+
+
+-- 7. Tenure Group Analysis
+
+SELECT
+    CASE
+        WHEN tenure BETWEEN 0 AND 12 THEN '0-12 Months'
+        WHEN tenure BETWEEN 13 AND 24 THEN '13-24 Months'
+        WHEN tenure BETWEEN 25 AND 48 THEN '25-48 Months'
+        ELSE '49+ Months'
+    END AS Tenure_Group,
+
+    COUNT(*) AS Total_Customers,
+
+    SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END)
+        AS Churned_Customers,
+
+    ROUND(
+        100.0 * SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS Churn_Rate
+
+FROM customer_churn_stage
+
+GROUP BY
+    CASE
+        WHEN tenure BETWEEN 0 AND 12 THEN '0-12 Months'
+        WHEN tenure BETWEEN 13 AND 24 THEN '13-24 Months'
+        WHEN tenure BETWEEN 25 AND 48 THEN '25-48 Months'
+        ELSE '49+ Months'
+    END
+
+ORDER BY Churn_Rate DESC;

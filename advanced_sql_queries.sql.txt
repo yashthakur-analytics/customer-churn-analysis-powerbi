@@ -1,0 +1,247 @@
+-- ==========================================
+-- CUSTOMER CHURN ANALYSIS - ADVANCED SQL
+-- ==========================================
+
+-- ==========================================
+-- 1. Risk Segmentation using CASE
+-- ==========================================
+
+SELECT
+    Contract,
+
+    CASE
+        WHEN Contract = 'Month-to-month'
+            THEN 'High Risk'
+
+        WHEN Contract = 'One year'
+            THEN 'Medium Risk'
+
+        ELSE 'Low Risk'
+    END AS Risk_Category,
+
+    COUNT(*) AS Total_Customers
+
+FROM customer_churn_stage
+
+GROUP BY Contract
+ORDER BY Total_Customers DESC;
+
+
+-- ==========================================
+-- 2. CTE - Contract Churn Analysis
+-- ==========================================
+
+WITH Contract_Churn AS
+(
+    SELECT
+        Contract,
+        COUNT(*) AS Total_Customers,
+
+        SUM(
+            CASE
+                WHEN Churn = 'Yes'
+                THEN 1
+                ELSE 0
+            END
+        ) AS Churned_Customers
+
+    FROM customer_churn_stage
+
+    GROUP BY Contract
+)
+
+SELECT
+    Contract,
+    Total_Customers,
+    Churned_Customers,
+
+    ROUND(
+        100.0 * Churned_Customers
+        / Total_Customers,
+        2
+    ) AS Churn_Rate
+
+FROM Contract_Churn
+ORDER BY Churn_Rate DESC;
+
+
+-- ==========================================
+-- 3. CTE with Average Churn Rate
+-- ==========================================
+
+WITH Contract_Churn AS
+(
+    SELECT
+        Contract,
+
+        ROUND(
+            100.0 *
+            SUM(CASE WHEN Churn='Yes' THEN 1 ELSE 0 END)
+            / COUNT(*),
+            2
+        ) AS Churn_Rate
+
+    FROM customer_churn_stage
+
+    GROUP BY Contract
+)
+
+SELECT
+    Contract,
+    Churn_Rate,
+    AVG(Churn_Rate) OVER() AS Average_Churn_Rate
+
+FROM Contract_Churn;
+
+
+-- ==========================================
+-- 4. Window Function - Rank Contracts
+-- ==========================================
+
+WITH Contract_Churn AS
+(
+    SELECT
+        Contract,
+
+        ROUND(
+            100.0 *
+            SUM(CASE WHEN Churn='Yes' THEN 1 ELSE 0 END)
+            / COUNT(*),
+            2
+        ) AS Churn_Rate
+
+    FROM customer_churn_stage
+
+    GROUP BY Contract
+)
+
+SELECT
+    Contract,
+    Churn_Rate,
+
+    RANK() OVER(
+        ORDER BY Churn_Rate DESC
+    ) AS Churn_Rank
+
+FROM Contract_Churn;
+
+
+-- ==========================================
+-- 5. Dense Rank Example
+-- ==========================================
+
+WITH Contract_Churn AS
+(
+    SELECT
+        Contract,
+
+        ROUND(
+            100.0 *
+            SUM(CASE WHEN Churn='Yes' THEN 1 ELSE 0 END)
+            / COUNT(*),
+            2
+        ) AS Churn_Rate
+
+    FROM customer_churn_stage
+
+    GROUP BY Contract
+)
+
+SELECT
+    Contract,
+    Churn_Rate,
+
+    RANK() OVER(
+        ORDER BY Churn_Rate DESC
+    ) AS Churn_Rank,
+
+    DENSE_RANK() OVER(
+        ORDER BY Churn_Rate DESC
+    ) AS Dense_Churn_Rank
+
+FROM Contract_Churn;
+
+
+-- ==========================================
+-- 6. Revenue Impact of Churn Analysis
+-- ==========================================
+
+SELECT
+    Churn,
+    COUNT(*) AS Total_Customers,
+
+    ROUND(
+        AVG(CAST(MonthlyCharges AS FLOAT)),
+        2
+    ) AS Avg_Monthly_Charge,
+
+    ROUND(
+        SUM(CAST(MonthlyCharges AS FLOAT)),
+        2
+    ) AS Total_Monthly_Revenue
+
+FROM customer_churn_stage
+
+GROUP BY Churn;
+
+
+-- ==========================================
+-- 7. Customer Lifetime Value Analysis
+-- ==========================================
+
+SELECT
+    Contract,
+
+    COUNT(*) AS Total_Customers,
+
+    ROUND(
+        AVG(CAST(MonthlyCharges AS FLOAT)),
+        2
+    ) AS Avg_Monthly_Charge,
+
+    ROUND(
+        AVG(CAST(TotalCharges AS FLOAT)),
+        2
+    ) AS Avg_Total_Charges
+
+FROM customer_churn_stage
+
+GROUP BY Contract
+
+ORDER BY Avg_Total_Charges DESC;
+
+
+-- ==========================================
+-- 8. Top Churn Drivers Analysis
+-- ==========================================
+
+SELECT
+    Contract,
+    InternetService,
+    PaymentMethod,
+
+    COUNT(*) AS Total_Customers,
+
+    SUM(
+        CASE
+            WHEN Churn = 'Yes'
+            THEN 1
+            ELSE 0
+        END
+    ) AS Churned_Customers,
+
+    ROUND(
+        100.0 *
+        SUM(CASE WHEN Churn = 'Yes' THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS Churn_Rate
+
+FROM customer_churn_stage
+
+GROUP BY
+    Contract,
+    InternetService,
+    PaymentMethod
+
+ORDER BY Churn_Rate DESC;
