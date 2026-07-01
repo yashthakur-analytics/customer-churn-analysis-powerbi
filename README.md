@@ -148,7 +148,7 @@ This project demonstrates the complete analytics workflow, from SQL-based data e
 
 ## 👨‍💻 Author
 
-**Your Name** Yash Thakur
+**Your Name:** Yash Thakur
 **Project Type:** Customer Churn Analysis Dashboard
 
 - GitHub: https://github.com/yashthakur-analytics
